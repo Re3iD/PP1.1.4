@@ -1,13 +1,10 @@
 package jm.task.core.jdbc.util;
-import org.hibernate.Session;
-import org.hibernate.SessionException;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 
 public class Util {
@@ -40,48 +37,28 @@ public class Util {
         }
     }
     private static final SessionFactory sessionFactory = buildFactory();
-    private static Session session;
-    private static Transaction transaction;
 
     private static final SessionFactory buildFactory(){
         SessionFactory state = null;
         try{
-            state =  new Configuration().configure().buildSessionFactory();
-        }catch(Exception err){
+            Properties prop = new Properties();
+            prop.setProperty("hibernate.connection.url", "jdbc:mysql://<your-host>:<your-port>/<your-dbname>");
+
+            //You can use any database you want, I had it configured for Postgres
+            prop.setProperty("dialect", "org.hibernate.dialect.MySQL");
+
+            prop.setProperty("hibernate.connection.username", "root");
+            prop.setProperty("hibernate.connection.password", "1W2E3R4t5y6u");
+            prop.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
+            prop.setProperty("show_sql", "true");
+            state = new Configuration().addProperties(prop).buildSessionFactory();
+        }catch(Throwable err){
             err.printStackTrace();
         }
         return state;
     }
     public static SessionFactory getSessionFactory(){
         return sessionFactory;
-    }
-    public void closeSessionFactory(){
-        try{
-            getSessionFactory().close();
-        }catch (Exception err){
-            err.printStackTrace();
-        }
-    }
-    public static Session getSession(){
-        return session;
-    }
-    public Transaction getTransaction(){
-        return transaction;
-    }
-    public static Session openSession(){
-        return getSessionFactory().openSession();
-    }
-    public static Transaction openTransactionSession(){
-        session = openSession();
-        transaction = session.beginTransaction();
-        return transaction;
-    }
-    public static void closeSession(){
-        session.close();
-    }
-    public static void closeTransactionSession(){
-        transaction.commit();
-        closeSession();
     }
 
 }
